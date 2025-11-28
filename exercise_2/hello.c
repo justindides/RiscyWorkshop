@@ -19,6 +19,6 @@ int _start()
         result += *(volatile int*)&i;
     }
     result += 11;
-    exit(result);
+    // exit(result);
     return result;
 }
