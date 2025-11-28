@@ -166,6 +166,14 @@ static ALWAYS_INLINE void handler_mul(VMContext& ctx)
     dst       = op1 * op2;
 }
 
+static ALWAYS_INLINE void handler_sub(VMContext& ctx)
+{
+    auto& dst = ctx.op_reg();
+    auto& op1 = ctx.op_reg();
+    auto& op2 = ctx.op_reg();
+    dst       = op1 - op2;
+}
+
 static __attribute__((noinline)) uint64_t
 execute_bytecode(const VMPreprocessor<>& bytecode, uint64_t r0, uint64_t r1, uint64_t r2, uint64_t r3)
 {
@@ -213,6 +221,9 @@ execute_bytecode(const VMPreprocessor<>& bytecode, uint64_t r0, uint64_t r1, uin
         case 8:
             handler_mul(ctx);
             break;
+        case 9:
+            handler_sub(ctx);
+            break;
         default:
             __builtin_unreachable();
         }
@@ -248,6 +259,7 @@ execute_bytecode(const VMPreprocessor<>& bytecode, uint64_t r0, uint64_t r1, uin
 #define XOR(dst, op1, op2)       OPCODE(6), dst, op1, op2
 #define OR(dst, op1, op2)        OPCODE(7), dst, op1, op2
 #define MUL(dst, op1, op2)       OPCODE(8), dst, op1, op2
+#define SUB(dst, op1, op2)       OPCODE(9), dst, op1, op2
 
 /*
 constexpr static auto bytecode = VMPreprocessor({
@@ -269,6 +281,14 @@ constexpr static auto bytecode = VMPreprocessor({
     RET(REG(6)),
 });
 
+constexpr static auto bytecode_add = VMPreprocessor({ADD(REG(4), REG(0), REG(1)), RET(REG(4))});
+
+constexpr static auto bytecode_mul = VMPreprocessor({MUL(REG(4), REG(0), REG(1)), RET(REG(4))});
+
+constexpr static auto bytecode_sub = VMPreprocessor({SUB(REG(4), REG(0), REG(1)), RET(REG(4))});
+
+constexpr static auto bytecode_42 = VMPreprocessor({MUL(REG(4), REG(0), REG(1)), RET(REG(4))});
+
 int main(int argc, char** argv)
 {
     // Usage: ./minivm 1 2 3 4
@@ -286,6 +306,6 @@ int main(int argc, char** argv)
         printf("%02X", bytecode.data[i]);
     }
     puts("");
-    auto ret = execute_bytecode(bytecode, args[0], args[1], args[2], args[3]);
+    auto ret = execute_bytecode(bytecode_add, args[0], args[1], args[2], args[3]);
     printf("result: %" PRIi64 "\n", ret);
 }
